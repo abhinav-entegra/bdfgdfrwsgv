@@ -2,6 +2,7 @@ import os
 import uuid
 
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ from models import db, User, Message, Channel, Notification, ChannelVisit, DMPer
 from db_config import configure_sqlalchemy
 from database_bootstrap import run_client_database_bootstrap
 from admin_blueprint import admin_bp, create_initial_admin
+from legacy_sqlite_import import try_auto_import_legacy
 from socket_auth import create_socket_token
 from production_settings import apply_production_config
 from public_urls import (
@@ -61,12 +63,33 @@ if not os.path.exists(UPLOAD_FOLDER):
 db.init_app(app)
 with app.app_context():
     run_client_database_bootstrap(app)
+    # Import old chat.db / LEGACY_SQLITE_FILE before seeding so PKs and users survive.
+    try_auto_import_legacy(os.path.dirname(os.path.abspath(__file__)), _unified_db_path)
     create_initial_admin()
 
 app.register_blueprint(admin_bp)
 
 login_manager = LoginManager(app)
-login_manager.login_view = 'unified_login'
+login_manager.login_view = 'login_client'
+
+
+def _safe_next_redirect(target):
+    if not target or not isinstance(target, str):
+        return None
+    p = urlparse(target)
+    if p.scheme not in ('http', 'https'):
+        return None
+    base = urlparse(request.host_url)
+    if p.netloc != base.netloc:
+        return None
+    return target
+
+
+@login_manager.unauthorized_handler
+def _handle_unauthorized():
+    if request.path.startswith('/admin'):
+        return redirect(url_for('login_admin', next=request.url))
+    return redirect(url_for('login_client', next=request.url))
 
 
 @app.route("/healthz", methods=["GET"])
@@ -242,24 +265,62 @@ def get_channel_member_records(channel, viewer):
 
 @app.route('/')
 def index():
-    if not current_user.is_authenticated:
-        return redirect(url_for('unified_login'))
-    can_admin = current_user.role in ('admin', 'superadmin')
-    return render_template('portal_hub.html', can_admin_console=can_admin)
+    can_admin = current_user.is_authenticated and current_user.role in ('admin', 'superadmin')
+    return render_template(
+        'portal_hub.html',
+        is_authenticated=current_user.is_authenticated,
+        can_admin_console=can_admin,
+    )
 
-@app.route('/login', methods=['GET', 'POST'])
-def unified_login():
+
+@app.route('/login/client', methods=['GET', 'POST'])
+def login_client():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('index'))
+            nxt = request.args.get('next') or request.form.get('next')
+            if nxt and _safe_next_redirect(nxt):
+                return redirect(nxt)
+            return redirect(url_for('dashboard'))
         flash('Invalid credentials.', 'error')
-    return render_template('unified_login.html')
+    return render_template('client_login.html', admin_portal_url=None)
+
+
+@app.route('/login/admin', methods=['GET', 'POST'])
+def login_admin():
+    if current_user.is_authenticated:
+        if current_user.role in ('admin', 'superadmin'):
+            return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, password):
+            if user.role not in ('admin', 'superadmin'):
+                flash(
+                    'This sign-in is for administrator accounts. Use Client sign-in for workspace access.',
+                    'error',
+                )
+                return redirect(url_for('login_client'))
+            login_user(user)
+            nxt = request.args.get('next') or request.form.get('next')
+            if nxt and _safe_next_redirect(nxt):
+                return redirect(nxt)
+            return redirect(url_for('admin.admin_dashboard'))
+        flash('Invalid credentials.', 'error')
+    return render_template('login.html', client_portal_url=None)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def unified_login():
+    """Legacy URL: send users to the portal first."""
+    return redirect(url_for('index'))
 
 @app.route('/dashboard')
 @login_required
@@ -287,7 +348,7 @@ def dashboard():
 @login_required
 def unified_logout():
     logout_user()
-    return redirect(url_for('unified_login'))
+    return redirect(url_for('index'))
 
 @app.route('/api/switch_ecosystem', methods=['POST'])
 @login_required

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose workspace | Nexus iQ</title>
+    <title>Nexus iQ</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
@@ -177,7 +177,11 @@
 <body>
     <header class="top-bar">
         <span class="brand">Nexus iQ</span>
+        {% if is_authenticated %}
         <a class="sign-out" href="{{ url_for('unified_logout') }}">Sign out</a>
+        {% else %}
+        <span></span>
+        {% endif %}
     </header>
 
     <div class="wrap">
@@ -191,31 +195,50 @@
           {% endif %}
         {% endwith %}
 
-        <h1>Where do you want to go?</h1>
-        <p class="sub">Same account — pick the experience you need right now.</p>
+        <h1>{% if is_authenticated %}Where do you want to go?{% else %}Welcome to Nexus iQ{% endif %}</h1>
+        <p class="sub">
+            {% if is_authenticated %}
+            Same account — pick the experience you need right now.
+            {% else %}
+            Choose Client or Admin, then sign in with the matching screen.
+            {% endif %}
+        </p>
 
         <div class="grid">
+            {% if is_authenticated %}
             <a class="choice choice-client" href="{{ url_for('dashboard') }}">
+            {% else %}
+            <a class="choice choice-client" href="{{ url_for('login_client') }}">
+            {% endif %}
                 <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-comments"></i></div>
                 <h2>Client</h2>
                 <p>Channels, groups, DMs, and your day-to-day workspace.</p>
-                <span class="tag">Open workspace</span>
+                <span class="tag">{% if is_authenticated %}Open workspace{% else %}Client sign in{% endif %}</span>
             </a>
 
-            {% if can_admin_console %}
-            <a class="choice choice-admin" href="{{ url_for('admin.admin_dashboard') }}">
+            {% if is_authenticated %}
+                {% if can_admin_console %}
+                <a class="choice choice-admin" href="{{ url_for('admin.admin_dashboard') }}">
+                    <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h2>Admin</h2>
+                    <p>Users, teams, ecosystems, and workspace administration.</p>
+                    <span class="tag">Open admin console</span>
+                </a>
+                {% else %}
+                <div class="choice choice-admin disabled" role="note" aria-disabled="true">
+                    <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-lock"></i></div>
+                    <h2>Admin</h2>
+                    <p>Reserved for administrator accounts. Use Client for your workspace.</p>
+                    <span class="tag" style="color: var(--muted);">Not available</span>
+                </div>
+                {% endif %}
+            {% else %}
+            <a class="choice choice-admin" href="{{ url_for('login_admin') }}">
                 <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
                 <h2>Admin</h2>
                 <p>Users, teams, ecosystems, and workspace administration.</p>
-                <span class="tag">Open admin console</span>
+                <span class="tag">Admin sign in</span>
             </a>
-            {% else %}
-            <div class="choice choice-admin disabled" role="note" aria-disabled="true">
-                <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-lock"></i></div>
-                <h2>Admin</h2>
-                <p>Reserved for administrator accounts. Use Client for your workspace.</p>
-                <span class="tag" style="color: var(--muted);">Not available</span>
-            </div>
             {% endif %}
         </div>
     </div>

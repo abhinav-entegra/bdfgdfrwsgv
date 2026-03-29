@@ -487,7 +487,10 @@
               {% endif %}
             {% endwith %}
 
-            <form method="POST" action="/">
+            <form method="POST" action="{{ url_for('login_client') }}">
+                {% if request.args.get('next') %}
+                <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                {% endif %}
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" required placeholder="you@company.com" autocomplete="username">
@@ -500,7 +503,10 @@
             </form>
             {% if admin_portal_url %}
             <p class="portal-switch">Administrator? <a href="{{ admin_portal_url }}/">Open the admin console</a></p>
+            {% else %}
+            <p class="portal-switch"><a href="{{ url_for('login_admin') }}">Administrator? Sign in here</a></p>
             {% endif %}
+            <p class="portal-switch" style="margin-top:8px;"><a href="{{ url_for('index') }}">← Back to Client / Admin choice</a></p>
 
             <p class="foot">Member access - Nexus iQ</p>
         </section>

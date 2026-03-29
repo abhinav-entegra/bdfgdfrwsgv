@@ -464,7 +464,10 @@
               {% endif %}
             {% endwith %}
 
-            <form method="POST" action="/">
+            <form method="POST" action="{{ url_for('login_admin') }}">
+                {% if request.args.get('next') %}
+                <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                {% endif %}
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" required placeholder="you@company.com" autocomplete="username">
@@ -481,7 +484,10 @@
             </form>
             {% if client_portal_url %}
             <p class="portal-switch">Team member? <a href="{{ client_portal_url }}/">Sign in to the client workspace</a></p>
+            {% else %}
+            <p class="portal-switch">Team member? <a href="{{ url_for('login_client') }}">Sign in to the client workspace</a></p>
             {% endif %}
+            <p class="portal-switch" style="margin-top:8px;"><a href="{{ url_for('index') }}">← Back to Client / Admin choice</a></p>
         </section>
     </main>
 
