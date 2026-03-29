@@ -68,6 +68,13 @@ app.register_blueprint(admin_bp)
 login_manager = LoginManager(app)
 login_manager.login_view = 'unified_login'
 
+
+@app.route("/healthz", methods=["GET"])
+def healthz():
+    """Lightweight probe for load balancers (Railway, etc.)."""
+    return "ok", 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
