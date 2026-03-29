@@ -10,7 +10,6 @@ import os
 import sqlite3
 from pathlib import Path
 
-INSTANCE_DIR = "instance"
 MARKER_NAME = "legacy_sqlite_imported.txt"
 
 TABLE_ORDER = [
@@ -100,19 +99,20 @@ def _fingerprint(path: Path) -> str:
 
 def try_auto_import_legacy(base_dir: str, dest_path: str) -> dict[str, int] | None:
     """
-    If LEGACY_SQLITE_FILE is set or chat.db exists beside the app, merge into dest_path
-    before seeding. Skips if the same file was already merged (see instance/ marker),
-    unless FORCE_LEGACY_MERGE=1.
+    If LEGACY_SQLITE_FILE is set or chat.db exists (app dir or same folder as unified_chat.db),
+    merge into dest_path before seeding. Marker file lives next to dest (survives redeploy on a volume).
     """
     base = Path(base_dir)
     dest = Path(dest_path).resolve()
     if not dest.is_file():
         return None
 
+    same_dir = dest.parent
     candidates: list[Path] = []
     env_path = os.getenv("LEGACY_SQLITE_FILE", "").strip()
     if env_path:
         candidates.append(Path(env_path).expanduser())
+    candidates.append(same_dir / "chat.db")
     candidates.append(base / "chat.db")
 
     source: Path | None = None
@@ -127,9 +127,7 @@ def try_auto_import_legacy(base_dir: str, dest_path: str) -> dict[str, int] | No
     if not source:
         return None
 
-    inst = base / INSTANCE_DIR
-    inst.mkdir(parents=True, exist_ok=True)
-    marker_path = inst / MARKER_NAME
+    marker_path = same_dir / MARKER_NAME
     force = os.getenv("FORCE_LEGACY_MERGE", "").lower() in ("1", "true", "yes")
     fp = _fingerprint(source)
 

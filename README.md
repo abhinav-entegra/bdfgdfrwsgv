@@ -6,12 +6,17 @@ Run locally: `python unified_app.py`
 
 On startup, Entegrasources gets **canonical teams** (Sales Alpha Core, Growth Ops Node, KPI Krushers, Deal Avengers, Ecosystem Core) if missing, and the primary superadmin is linked to the first team for the admin UI.
 
-**Old data / legacy SQLite**
+### Data survives redeploy (Railway / Docker)
 
-1. **Automatic (recommended):** Put your old database next to `unified_app.py` as **`chat.db`**, or set env **`LEGACY_SQLITE_FILE`** to its full path. On startup, rows are merged into **`unified_chat.db` before** seeding (so users/teams/messages come back). A marker in **`instance/legacy_sqlite_imported.txt`** prevents re-merging the same file; set **`FORCE_LEGACY_MERGE=1`** to merge again (e.g. after replacing `chat.db`).
+The deploy filesystem is **ephemeral**: **`unified_chat.db` in the repo root is deleted every redeploy** unless you change storage.
 
-2. **Manual** (app stopped): `python tools/merge_sqlite_legacy.py path/to/chat.db`
+**Option A — Volume + SQLite:** Add a Railway **Volume** (e.g. mount **`/data`**). Set **`SQLITE_DATA_DIR=/data`**. The DB is **`/data/unified_chat.db`** and persists. Put **`chat.db`** in `/data` (or set **`LEGACY_SQLITE_FILE`**) to pull in old data once.
 
-On Railway, the disk is ephemeral unless you use a **volume**—copy `chat.db` into the mounted path and set **`LEGACY_SQLITE_FILE`** to that path, or run the manual merge against a persistent volume.
+**Option B — Postgres:** Add Railway **Postgres**, link **`DATABASE_URL`**, set **`UNIFIED_USE_POSTGRES=true`**.
+
+### Legacy SQLite import (SQLite mode only)
+
+1. Auto: **`chat.db`** next to the app, under **`SQLITE_DATA_DIR`**, or **`LEGACY_SQLITE_FILE`**. Marker: **`legacy_sqlite_imported.txt`** next to the DB. **`FORCE_LEGACY_MERGE=1`** to merge again.  
+2. Manual: `python tools/merge_sqlite_legacy.py path/to/chat.db`
 
 # bdfgdfrwsgv

@@ -3,6 +3,7 @@ __pycache__/
 instance/
 # SQLite databases (unified app uses unified_chat.db next to unified_app.py — all DB data lives here; file is created on first run)
 *.db
+legacy_sqlite_imported.txt
 static/uploads/voice/*
 static/uploads/images/*
 .env

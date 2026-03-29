@@ -42,11 +42,28 @@ app = Flask(__name__)
 apply_production_config(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.getenv('CLIENT_SECRET_KEY') or os.getenv('ADMIN_SECRET_KEY') or 'dev-unified-secret'
 
-# Standalone unified app: all persistence is SQLite in this single file (DATABASE_URL is ignored).
-_unified_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "unified_chat.db")
-os.environ.pop("DATABASE_URL", None)
-configure_sqlalchemy(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + _unified_db_path.replace("\\", "/")
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Railway / Docker: default filesystem is wiped on redeploy. Use either:
+#   SQLITE_DATA_DIR=/data  (Railway Volume mounted at /data) → unified_chat.db lives there, or
+#   UNIFIED_USE_POSTGRES=true + DATABASE_URL (Railway Postgres) → durable without SQLite file.
+_use_postgres = (
+    os.getenv("UNIFIED_USE_POSTGRES", "").strip().lower() in ("1", "true", "yes")
+    and bool(os.getenv("DATABASE_URL", "").strip())
+)
+if _use_postgres:
+    configure_sqlalchemy(app)
+    _unified_db_path = os.path.join(_BASE_DIR, "unified_chat.db")
+else:
+    _data_dir = os.getenv("SQLITE_DATA_DIR", "").strip()
+    if _data_dir:
+        os.makedirs(_data_dir, exist_ok=True)
+        _unified_db_path = os.path.join(_data_dir, "unified_chat.db")
+    else:
+        _unified_db_path = os.path.join(_BASE_DIR, "unified_chat.db")
+    os.environ.pop("DATABASE_URL", None)
+    configure_sqlalchemy(app)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + _unified_db_path.replace("\\", "/")
+
 app.config['SESSION_COOKIE_NAME'] = 'nexus_session'
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 
@@ -63,8 +80,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 db.init_app(app)
 with app.app_context():
     run_client_database_bootstrap(app)
-    # Import old chat.db / LEGACY_SQLITE_FILE before seeding so PKs and users survive.
-    try_auto_import_legacy(os.path.dirname(os.path.abspath(__file__)), _unified_db_path)
+    if not _use_postgres:
+        try_auto_import_legacy(_BASE_DIR, _unified_db_path)
     create_initial_admin()
 
 app.register_blueprint(admin_bp)
