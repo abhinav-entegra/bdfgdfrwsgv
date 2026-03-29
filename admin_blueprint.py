@@ -28,28 +28,51 @@ def create_initial_admin():
     admin_user = User.query.filter_by(email=admin_email).first()
     if not admin_user:
         hashed_password = generate_password_hash('Hero@hero0012', method='pbkdf2:sha256')
-        new_admin = User(email=admin_email, password=hashed_password, role='superadmin', 
+        new_admin = User(email=admin_email, password=hashed_password, role='superadmin',
                          workspace_id=entegra_ws.id, name="Primary Superadmin")
         db.session.add(new_admin)
         db.session.commit()
         log_action("Primary Superadmin Node initialized.")
+        admin_user = new_admin
     else:
-        # Ensure role is superadmin if already exists
         if admin_user.role != 'superadmin':
             admin_user.role = 'superadmin'
             db.session.commit()
-    
+
     # Assign orphaned users/teams to Entegrasources
     User.query.filter_by(workspace_id=None).update({User.workspace_id: entegra_ws.id})
     Team.query.filter_by(workspace_id=None).update({Team.workspace_id: entegra_ws.id})
     db.session.commit()
 
-    # Synchronization of primary ecosystem clusters
-    if not Team.query.filter_by(workspace_id=entegra_ws.id).first():
-        for t_name in ["Sales Alpha Core", "Growth Ops Node", "KPI Krushers", "Deal Avengers"]:
+    # Canonical teams (idempotent): restore defaults even if DB was partially cleared or redeployed.
+    canonical = (
+        "Sales Alpha Core",
+        "Growth Ops Node",
+        "KPI Krushers",
+        "Deal Avengers",
+        "Ecosystem Core",
+    )
+    added_or_linked = False
+    for t_name in canonical:
+        row = Team.query.filter_by(name=t_name).first()
+        if row is None:
             db.session.add(Team(name=t_name, workspace_id=entegra_ws.id))
-        db.session.commit()
-        log_action("Primary ecosystem clusters synchronized.")
+            added_or_linked = True
+        elif row.workspace_id is None:
+            row.workspace_id = entegra_ws.id
+            added_or_linked = True
+    db.session.commit()
+    if added_or_linked:
+        log_action("Primary ecosystem clusters synchronized (canonical teams ensured).")
+
+    # Superadmin shows in People with a team when possible
+    if admin_user and not (admin_user.team_name or "").strip():
+        first_team = (
+            Team.query.filter_by(workspace_id=entegra_ws.id).order_by(Team.id.asc()).first()
+        )
+        if first_team:
+            admin_user.team_name = first_team.name
+            db.session.commit()
 
 def log_action(action):
     new_log = Log(action=action)
