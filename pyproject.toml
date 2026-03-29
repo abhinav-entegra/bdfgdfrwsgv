@@ -1,0 +1,11 @@
+[project]
+name = "nexus-iq-vercel-notice"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.0.0",
+]
+
+# Tell Vercel to use this tiny Flask app instead of root app.py (full admin stack).
+[project.scripts]
+app = "vercel_app:app"

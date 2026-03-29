@@ -1,0 +1,37 @@
+# Prevent Vercel from treating root app.py / unified_app as serverless WSGI (they will crash).
+# Real deploy: Railway + Procfile + gunicorn unified_app:app
+
+app.py
+unified_app.py
+client_app.py
+signaler_app.py
+admin_blueprint.py
+requirements.txt
+runtime.txt
+Procfile
+Procfile.signaler
+railway.toml
+
+deploy-admin/
+deploy-client/
+deploy-signaler/
+database-container/
+
+templates/
+static/
+models.py
+db_config.py
+database_bootstrap.py
+realtime_handlers.py
+chat_policy.py
+socket_auth.py
+presence_store.py
+production_settings.py
+public_urls.py
+
+*.db
+.git/
+__pycache__/
+*.pyc
+.env
+.env.*
