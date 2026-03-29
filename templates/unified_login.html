@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | Nexus iQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f7f4ff;
+            --bg-soft: #fffefe;
+            --ink: #18152a;
+            --muted: #7b7694;
+            --line: rgba(93, 78, 151, 0.08);
+            --line-strong: rgba(93, 78, 151, 0.14);
+            --panel: rgba(255, 255, 255, 0.82);
+            --panel-strong: rgba(255, 255, 255, 0.92);
+            --field: rgba(244, 241, 255, 0.96);
+            --primary: #7b63ea;
+            --primary-deep: #5f4bc8;
+            --primary-soft: rgba(123, 99, 234, 0.14);
+            --rose: #efb7dc;
+            --mint: #7fd6cc;
+            --lavender: #d9d0ff;
+            --shadow: 0 40px 90px -52px rgba(48, 37, 94, 0.28);
+            --shadow-soft: 0 18px 34px -24px rgba(48, 37, 94, 0.16);
+            --radius-xl: 34px;
+            --radius-lg: 22px;
+            --radius-md: 18px;
+            --tilt-x: 0px;
+            --tilt-y: 0px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Manrope', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 14% 18%, rgba(239, 183, 220, 0.2), transparent 22%),
+                radial-gradient(circle at 86% 14%, rgba(123, 99, 234, 0.12), transparent 18%),
+                radial-gradient(circle at 78% 82%, rgba(127, 214, 204, 0.12), transparent 18%),
+                linear-gradient(180deg, #fdfcff 0%, #ffffff 38%, var(--bg) 100%);
+            -webkit-font-smoothing: antialiased;
+            zoom: 0.8;
+        }
+
+        .login-viewport {
+            position: relative;
+            z-index: 1;
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 0;
+            padding: clamp(28px, 5vw, 56px);
+            box-sizing: border-box;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(32px);
+            opacity: 0.8;
+            animation: auraFloat 16s ease-in-out infinite;
+        }
+
+        body::before {
+            width: 28vw;
+            height: 28vw;
+            min-width: 280px;
+            min-height: 280px;
+            left: -10vw;
+            top: 14vh;
+            background: radial-gradient(circle, rgba(239, 183, 220, 0.22), rgba(239, 183, 220, 0));
+        }
+
+        body::after {
+            width: 32vw;
+            height: 32vw;
+            min-width: 320px;
+            min-height: 320px;
+            right: -10vw;
+            bottom: -10vh;
+            background: radial-gradient(circle, rgba(127, 214, 204, 0.2), rgba(127, 214, 204, 0));
+            animation-delay: -8s;
+        }
+
+        .field-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.9;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.22fr) minmax(400px, 500px);
+            gap: clamp(56px, 8vw, 132px);
+            align-items: center;
+            justify-items: stretch;
+            width: min(100%, 1380px);
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .story {
+            position: relative;
+            max-width: 700px;
+            transform: translate3d(calc(var(--tilt-x) * -0.18), calc(var(--tilt-y) * -0.18), 0);
+            transition: transform 0.18s ease-out;
+        }
+
+        .brand-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            padding: 0;
+            border-radius: 0;
+            background: none;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .brand-copy strong {
+            display: block;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.08em;
+            line-height: 1;
+            color: #1d1932;
+        }
+
+        .brand-copy span {
+            display: block;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        .eyebrow {
+            margin-top: 54px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--primary);
+        }
+
+        .story h1 {
+            margin-top: 18px;
+            font-size: clamp(46px, 5.2vw, 72px);
+            line-height: 1.02;
+            letter-spacing: -0.085em;
+            font-weight: 800;
+            color: #1f1a34;
+            text-wrap: balance;
+            max-width: 780px;
+        }
+
+        .story p {
+            margin-top: 24px;
+            max-width: 600px;
+            font-size: 18px;
+            line-height: 1.88;
+            color: rgba(31, 26, 52, 0.7);
+        }
+
+        .story-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 40px;
+            max-width: 760px;
+        }
+
+        .metric {
+            padding: 22px 22px 20px;
+            min-height: 148px;
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            color: var(--primary-deep);
+        }
+
+        .metric span {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .form-card {
+            position: relative;
+            padding: 40px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(24px);
+            overflow: hidden;
+            justify-self: center;
+            width: min(100%, 500px);
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transform: translate3d(calc(var(--tilt-x) * 0.22), calc(var(--tilt-y) * 0.22), 0);
+            transition: transform 0.18s ease-out;
+        }
+
+        .form-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at right top, rgba(123, 99, 234, 0.1), transparent 28%),
+                radial-gradient(circle at left bottom, rgba(239, 183, 220, 0.1), transparent 30%);
+            pointer-events: none;
+        }
+
+        .form-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .form-top h2 {
+            font-size: 48px;
+            letter-spacing: -0.08em;
+            font-weight: 800;
+        }
+
+        .badge {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(123, 99, 234, 0.08);
+            color: var(--primary-deep);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .sub {
+            margin-top: 12px;
+            font-size: 16px;
+            line-height: 1.85;
+            color: var(--muted);
+        }
+
+        .flashes {
+            list-style: none;
+            margin-top: 20px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .flashes li {
+            padding: 13px 14px;
+            border-radius: 16px;
+            background: rgba(255, 243, 247, 0.94);
+            color: #b53761;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        form {
+            margin-top: 26px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(24, 21, 42, 0.46);
+        }
+
+        .form-group input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 19px 20px;
+            border-radius: var(--radius-md);
+            background: var(--field);
+            color: var(--ink);
+            font: inherit;
+            font-size: 16px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.84);
+            transition: box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+        }
+
+        .form-group input:focus {
+            background: #ffffff;
+            box-shadow: 0 0 0 4px var(--primary-soft);
+            transform: translateY(-1px);
+        }
+
+        .submit {
+            margin-top: 6px;
+            border: none;
+            border-radius: 18px;
+            padding: 19px 20px;
+            font: inherit;
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, #6049ca 0%, #7b63ea 54%, #efb7dc 100%);
+            box-shadow: 0 24px 40px -22px rgba(123, 99, 234, 0.42);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 28px 44px -22px rgba(123, 99, 234, 0.48);
+            filter: saturate(1.04);
+        }
+
+        .portal-switch {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 14px;
+            color: rgba(24, 21, 42, 0.55);
+        }
+
+        .portal-switch a {
+            color: #7057d1;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .portal-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .foot {
+            margin-top: 18px;
+            font-size: 12px;
+            text-align: center;
+            color: rgba(24, 21, 42, 0.42);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        @keyframes auraFloat {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(24px, -18px, 0) scale(1.04); }
+        }
+
+        @media (max-width: 980px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+                min-height: 100%;
+            }
+
+            .login-viewport {
+                flex: 1 1 auto;
+                align-items: flex-start;
+                padding: 20px;
+            }
+
+            .page {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .story {
+                max-width: 100%;
+                transform: none;
+            }
+
+            .story h1 {
+                font-size: clamp(50px, 14vw, 78px);
+            }
+
+            .story p {
+                max-width: 100%;
+            }
+
+            .story-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                width: min(100%, 540px);
+                min-height: 0;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="field-canvas" id="field-canvas" aria-hidden="true"></canvas>
+
+    <div class="login-viewport">
+    <main class="page">
+        <section class="story" aria-hidden="true">
+            <div class="brand-chip">
+                <div class="brand-copy">
+                    <strong>Nexus iQ</strong>
+                    <span>Unified sign in</span>
+                </div>
+            </div>
+
+            <div class="eyebrow">Welcome to Nexus iQ</div>
+            <h1>Welcome back to Nexus iQ.</h1>
+            <p>After you sign in, choose Client for day-to-day chat or Admin if your account has console access.</p>
+
+            <div class="story-metrics">
+                <div class="metric">
+                    <strong>Fast</strong>
+                    <span>Cleaner wayfinding across channels, groups, and daily workspaces</span>
+                </div>
+                <div class="metric">
+                    <strong>Live</strong>
+                    <span>Soft motion and lighter surfaces that keep the interface active, not noisy</span>
+                </div>
+                <div class="metric">
+                    <strong>Shared</strong>
+                    <span>One visual language carried directly into the client dashboard experience</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-card">
+            <div class="form-top">
+                <h2>Sign in</h2>
+                <div class="badge">One link</div>
+            </div>
+            <p class="sub">Use your workspace credentials to continue.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="you@company.com" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter password" autocomplete="current-password">
+                </div>
+                <button type="submit" class="submit">Continue</button>
+            </form>
+
+            <p class="foot">Nexus iQ</p>
+        </section>
+    </main>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('field-canvas');
+        const ctx = canvas.getContext('2d', { alpha: true });
+
+        if (canvas && ctx) {
+            const root = document.documentElement;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            let width = 0;
+            let height = 0;
+            let rafId = 0;
+            let dots = [];
+            const pointer = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 };
+            const target = { x: pointer.x, y: pointer.y };
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                buildDots();
+            }
+
+            function buildDots() {
+                const count = Math.max(220, Math.floor((width * height) / 7600));
+                const originX = width * 0.5;
+                const originY = height * 0.5;
+                const radius = Math.max(width, height) * 0.58;
+                dots = Array.from({ length: count }, (_, index) => {
+                    const angle = (index / count) * Math.PI * 2;
+                    const spread = radius * (0.1 + Math.pow(Math.random(), 0.92));
+                    const colorPool = [
+                        [123, 99, 234],
+                        [154, 132, 243],
+                        [239, 183, 220],
+                        [127, 214, 204]
+                    ];
+                    return {
+                        angle,
+                        radius: spread,
+                        x: originX + Math.cos(angle) * spread,
+                        y: originY + Math.sin(angle) * spread,
+                        hx: originX + Math.cos(angle) * spread,
+                        hy: originY + Math.sin(angle) * spread,
+                        vx: 0,
+                        vy: 0,
+                        size: 1 + Math.random() * 2.2,
+                        alpha: 0.16 + Math.random() * 0.26,
+                        noise: Math.random() * 1000,
+                        color: colorPool[index % colorPool.length]
+                    };
+                });
+            }
+
+            function render(time) {
+                const t = time * 0.00045;
+                pointer.x += (target.x - pointer.x) * 0.08;
+                pointer.y += (target.y - pointer.y) * 0.08;
+
+                const offsetX = ((pointer.x / width) - 0.5) * 26;
+                const offsetY = ((pointer.y / height) - 0.5) * 20;
+                root.style.setProperty('--tilt-x', `${offsetX}px`);
+                root.style.setProperty('--tilt-y', `${offsetY}px`);
+
+                ctx.clearRect(0, 0, width, height);
+                ctx.globalCompositeOperation = 'lighter';
+
+                for (const dot of dots) {
+                    const drift = Math.sin(t + dot.noise) * 10;
+                    const lift = Math.cos((t * 1.1) + dot.noise) * 8;
+                    const homeX = dot.hx + Math.cos(dot.angle + t * 0.12) * drift;
+                    const homeY = dot.hy + Math.sin(dot.angle + t * 0.16) * lift;
+                    const dx = dot.x - pointer.x;
+                    const dy = dot.y - pointer.y;
+                    const dist = Math.hypot(dx, dy) || 0.001;
+                    const force = Math.max(0, 1 - dist / 180);
+
+                    dot.vx += (homeX - dot.x) * 0.02 + (dx / dist) * force * 0.6;
+                    dot.vy += (homeY - dot.y) * 0.02 + (dy / dist) * force * 0.6;
+                    dot.vx *= 0.92;
+                    dot.vy *= 0.92;
+                    dot.x += dot.vx;
+                    dot.y += dot.vy;
+
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(${dot.color.join(',')}, ${dot.alpha})`;
+                    ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                rafId = requestAnimationFrame(render);
+            }
+
+            window.addEventListener('pointermove', (event) => {
+                target.x = event.clientX;
+                target.y = event.clientY;
+            }, { passive: true });
+
+            window.addEventListener('pointerleave', () => {
+                target.x = window.innerWidth * 0.5;
+                target.y = window.innerHeight * 0.5;
+            }, { passive: true });
+
+            window.addEventListener('resize', resize);
+            resize();
+            rafId = requestAnimationFrame(render);
+            window.addEventListener('beforeunload', () => cancelAnimationFrame(rafId));
+        }
+    </script>
+</body>
+</html>

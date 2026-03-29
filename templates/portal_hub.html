@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose workspace | Nexus iQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --bg: #f7f4ff;
+            --ink: #18152a;
+            --muted: #7b7694;
+            --primary: #7b63ea;
+            --primary-deep: #5f4bc8;
+            --primary-soft: rgba(123, 99, 234, 0.14);
+            --mint: #7fd6cc;
+            --rose: #efb7dc;
+            --panel: rgba(255, 255, 255, 0.88);
+            --line: rgba(93, 78, 151, 0.1);
+            --shadow: 0 40px 90px -52px rgba(48, 37, 94, 0.28);
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Manrope', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 14% 18%, rgba(239, 183, 220, 0.2), transparent 22%),
+                radial-gradient(circle at 86% 14%, rgba(123, 99, 234, 0.12), transparent 18%),
+                linear-gradient(180deg, #fdfcff 0%, var(--bg) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 4vw, 48px);
+            -webkit-font-smoothing: antialiased;
+        }
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px clamp(20px, 4vw, 40px);
+        }
+        .brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+        }
+        .sign-out {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+        }
+        .sign-out:hover { color: var(--primary-deep); }
+        .wrap {
+            width: 100%;
+            max-width: 920px;
+            margin-top: 36px;
+        }
+        h1 {
+            font-size: clamp(1.5rem, 3vw, 1.85rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .sub {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .choice {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
+            padding: 28px 26px;
+            box-shadow: var(--shadow);
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            cursor: pointer;
+            min-height: 200px;
+        }
+        a.choice:hover {
+            transform: translateY(-3px);
+            border-color: rgba(123, 99, 234, 0.35);
+            box-shadow: 0 48px 100px -48px rgba(48, 37, 94, 0.35);
+        }
+        .choice:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 3px;
+        }
+        .choice.disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+            box-shadow: none;
+        }
+        .choice.disabled:hover {
+            transform: none;
+            border-color: var(--line);
+        }
+        .icon-wrap {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 16px;
+        }
+        .choice-client .icon-wrap {
+            background: var(--primary-soft);
+            color: var(--primary-deep);
+        }
+        .choice-admin .icon-wrap {
+            background: rgba(127, 214, 204, 0.2);
+            color: #2a8a7a;
+        }
+        .choice h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        .choice p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .tag {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--primary);
+        }
+        .flashes {
+            list-style: none;
+            max-width: 920px;
+            margin: 0 auto 20px;
+            padding: 0;
+        }
+        .flashes li {
+            background: rgba(213, 71, 82, 0.1);
+            color: #a82835;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <span class="brand">Nexus iQ</span>
+        <a class="sign-out" href="{{ url_for('unified_logout') }}">Sign out</a>
+    </header>
+
+    <div class="wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <h1>Where do you want to go?</h1>
+        <p class="sub">Same account — pick the experience you need right now.</p>
+
+        <div class="grid">
+            <a class="choice choice-client" href="{{ url_for('dashboard') }}">
+                <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-comments"></i></div>
+                <h2>Client</h2>
+                <p>Channels, groups, DMs, and your day-to-day workspace.</p>
+                <span class="tag">Open workspace</span>
+            </a>
+
+            {% if can_admin_console %}
+            <a class="choice choice-admin" href="{{ url_for('admin.admin_dashboard') }}">
+                <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
+                <h2>Admin</h2>
+                <p>Users, teams, ecosystems, and workspace administration.</p>
+                <span class="tag">Open admin console</span>
+            </a>
+            {% else %}
+            <div class="choice choice-admin disabled" role="note" aria-disabled="true">
+                <div class="icon-wrap" aria-hidden="true"><i class="fa-solid fa-lock"></i></div>
+                <h2>Admin</h2>
+                <p>Reserved for administrator accounts. Use Client for your workspace.</p>
+                <span class="tag" style="color: var(--muted);">Not available</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

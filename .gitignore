@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+instance/
+# SQLite databases (unified app uses unified_chat.db next to unified_app.py — all DB data lives here; file is created on first run)
+*.db
+static/uploads/voice/*
+static/uploads/images/*
+.env
+diag_out.txt
+diag_out_utf8.txt
+workspace_info.txt
+tmp_*.py
+vwin/
+venv/
+.agents/
+.agent/
+_agents/
+_agent/
+_system/
+.system/
+_tmp/
+.tmp/
+.vscode/
+.idea/
+*.log

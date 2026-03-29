@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin sign in | Nexus iQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Color tokens aligned with templates/client_dashboard.html :root */
+        :root {
+            --primary: #846de8;
+            --primary-dark: #6952cd;
+            --dark-green: #4d3d80;
+            --mid-green: #ddd4ff;
+            --accent: #846de8;
+            --accent-green: #79d3c6;
+            --brand-amber: #fbf1f7;
+            --brand-blue: #9b8af3;
+            --bg-page: #f6f2fb;
+            --bg-sidebar: rgba(255, 255, 255, 0.88);
+            --bg-panel: rgba(255, 255, 255, 0.95);
+            --text-main: #1c1730;
+            --text-muted: #7b7490;
+            --border: rgba(84, 72, 123, 0.08);
+            --border-strong: rgba(84, 72, 123, 0.12);
+            --card-shadow: 0 28px 64px -40px rgba(84, 72, 123, 0.18);
+            --aura-pink: rgba(235, 188, 224, 0.14);
+            --aura-purple: rgba(132, 109, 232, 0.08);
+            --accent-blue: #846de8;
+            --success: #1f9d68;
+            --surface-soft: #fbf9ff;
+            --surface-elevated: #ffffff;
+            --primary-gradient: linear-gradient(135deg, #7057d1 0%, #9b8af3 56%, #86d8cf 100%);
+            --danger: #d54752;
+            /* Login-specific aliases */
+            --bg: var(--bg-page);
+            --ink: var(--text-main);
+            --muted: var(--text-muted);
+            --line: var(--border);
+            --line-strong: var(--border-strong);
+            --primary-deep: var(--primary-dark);
+            --primary-soft: rgba(118, 87, 255, 0.1);
+            --teal: var(--accent-green);
+            --rose: rgb(235, 188, 224);
+            --panel: rgba(255, 255, 255, 0.84);
+            --panel-solid: rgba(255, 255, 255, 0.95);
+            --field: rgba(251, 249, 255, 0.96);
+            --shadow: 0 42px 96px -56px rgba(84, 72, 123, 0.22);
+            --shadow-soft: var(--card-shadow);
+            --radius-xl: 34px;
+            --radius-lg: 24px;
+            --radius-md: 18px;
+            --tilt-x: 0px;
+            --tilt-y: 0px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Manrope', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 12% 14%, rgba(235, 188, 224, 0.16), transparent 22%),
+                radial-gradient(circle at 88% 4%, rgba(132, 109, 232, 0.12), transparent 18%),
+                radial-gradient(circle at 72% 82%, rgba(121, 211, 198, 0.1), transparent 20%),
+                linear-gradient(180deg, #fbf9ff 0%, #ffffff 38%, var(--bg) 100%);
+            -webkit-font-smoothing: antialiased;
+            zoom: 0.8;
+        }
+
+        .admin-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.92;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(0, 1.24fr) minmax(400px, 510px);
+            gap: clamp(54px, 8vw, 128px);
+            align-items: center;
+            width: min(100%, 1380px);
+            margin: 0 auto;
+            padding: clamp(36px, 5vw, 56px);
+        }
+
+        .story {
+            position: relative;
+            padding: 42px;
+            border-radius: 0;
+            background: transparent;
+            backdrop-filter: none;
+            box-shadow: none;
+            overflow: hidden;
+            transform: translate3d(calc(var(--tilt-x) * -0.18), calc(var(--tilt-y) * -0.18), 0);
+            transition: transform 0.18s ease-out;
+        }
+
+        .story > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            padding: 0;
+            border-radius: 0;
+            background: none;
+            box-shadow: none;
+        }
+
+        .brand-copy strong {
+            display: block;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.08em;
+            line-height: 1;
+            color: var(--ink);
+        }
+
+        .brand-copy span {
+            display: block;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        .eyebrow {
+            margin-top: 40px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--primary);
+        }
+
+        .story h1 {
+            margin-top: 18px;
+            font-size: clamp(46px, 5.2vw, 72px);
+            line-height: 1.02;
+            letter-spacing: -0.085em;
+            font-weight: 800;
+            max-width: 780px;
+            text-wrap: balance;
+        }
+
+        .story p {
+            margin-top: 18px;
+            max-width: 610px;
+            font-size: 17px;
+            line-height: 1.86;
+            color: color-mix(in srgb, var(--text-main) 72%, transparent);
+        }
+
+        .signal-grid {
+            margin-top: 32px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .signal-card {
+            padding: 22px;
+            min-height: 154px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .signal-card strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            color: color-mix(in srgb, var(--text-muted) 90%, transparent);
+            text-transform: uppercase;
+        }
+
+        .signal-card span {
+            display: block;
+            margin-top: 12px;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.07em;
+            color: var(--primary-deep);
+        }
+
+        .signal-card small {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .form-card {
+            position: relative;
+            padding: 40px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, var(--panel-solid), var(--panel));
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(24px);
+            overflow: hidden;
+            justify-self: end;
+            width: min(100%, 510px);
+            min-height: 580px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transform: translate3d(calc(var(--tilt-x) * 0.22), calc(var(--tilt-y) * 0.22), 0);
+            transition: transform 0.18s ease-out;
+        }
+
+        .form-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at left bottom, rgba(121, 211, 198, 0.1), transparent 28%),
+                radial-gradient(circle at right top, rgba(132, 109, 232, 0.12), transparent 24%);
+            pointer-events: none;
+        }
+
+        .form-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .form-top h2 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -0.08em;
+        }
+
+        .badge {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: var(--aura-purple);
+            color: var(--primary-deep);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .sub {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.82;
+        }
+
+        .flashes {
+            list-style: none;
+            margin-top: 20px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .flashes li {
+            padding: 13px 14px;
+            border-radius: 16px;
+            background: color-mix(in srgb, var(--danger) 10%, transparent);
+            color: var(--danger);
+            border: 1px solid color-mix(in srgb, var(--danger) 22%, transparent);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        form {
+            margin-top: 26px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 19px 20px;
+            border-radius: var(--radius-md);
+            background: var(--field);
+            color: var(--ink);
+            font: inherit;
+            font-size: 16px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.84);
+            transition: box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+        }
+
+        .form-group input:focus {
+            background: #ffffff;
+            box-shadow: 0 0 0 4px var(--primary-soft);
+            transform: translateY(-1px);
+        }
+
+        .remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .remember input {
+            accent-color: var(--primary);
+        }
+
+        .submit {
+            margin-top: 4px;
+            border: none;
+            border-radius: 18px;
+            padding: 19px 20px;
+            font: inherit;
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            background: var(--primary-gradient);
+            box-shadow: 0 24px 40px -22px color-mix(in srgb, var(--primary) 38%, transparent);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 28px 44px -22px color-mix(in srgb, var(--primary) 45%, transparent);
+            filter: saturate(1.04);
+        }
+
+        .portal-switch {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .portal-switch a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .portal-switch a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 980px) {
+            body {
+                overflow-y: auto;
+            }
+
+            .page {
+                grid-template-columns: 1fr;
+                gap: 22px;
+                padding: 20px;
+            }
+
+            .story {
+                padding: 28px;
+                transform: none;
+            }
+
+            .signal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                width: min(100%, 560px);
+                min-height: 0;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="admin-canvas" id="admin-canvas" aria-hidden="true"></canvas>
+
+    <main class="page">
+        <section class="story" aria-hidden="true">
+            <div class="brand-chip">
+                <div class="brand-copy">
+                    <strong>Nexus iQ</strong>
+                    <span>Admin control</span>
+                </div>
+            </div>
+
+            <div class="eyebrow">Welcome to Nexus iQ</div>
+            <h1>Welcome back. Manage the workspace with clarity.</h1>
+            <p>Step into a sharper control surface built for visibility, cleaner decisions, and faster movement across teams, members, and activity.</p>
+
+            <div class="signal-grid">
+                <div class="signal-card">
+                    <strong>Teams</strong>
+                    <span>Organized</span>
+                    <small>Move through people, units, and structure with less visual friction.</small>
+                </div>
+                <div class="signal-card">
+                    <strong>Signals</strong>
+                    <span>Visible</span>
+                    <small>See live activity and system state in a more focused presentation.</small>
+                </div>
+                <div class="signal-card">
+                    <strong>Control</strong>
+                    <span>Ready</span>
+                    <small>One visual language that carries directly into the admin dashboard.</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-card">
+            <div class="form-top">
+                <h2>Sign in</h2>
+                <div class="badge">Admin</div>
+            </div>
+            <p class="sub">Use your administrator credentials to continue.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                  <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="you@company.com" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter password" autocomplete="current-password">
+                </div>
+                <label class="remember" for="remember">
+                    <input type="checkbox" name="remember" id="remember">
+                    Keep this device signed in
+                </label>
+                <button type="submit" class="submit">Continue to admin</button>
+            </form>
+            {% if client_portal_url %}
+            <p class="portal-switch">Team member? <a href="{{ client_portal_url }}/">Sign in to the client workspace</a></p>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('admin-canvas');
+        const ctx = canvas.getContext('2d', { alpha: true });
+
+        if (canvas && ctx) {
+            const root = document.documentElement;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            let width = 0;
+            let height = 0;
+            let rafId = 0;
+            let nodes = [];
+            const pointer = { x: window.innerWidth * 0.46, y: window.innerHeight * 0.44 };
+            const target = { x: pointer.x, y: pointer.y };
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                buildNodes();
+            }
+
+            function buildNodes() {
+                const rows = 12;
+                const cols = 24;
+                const offsetX = width * 0.03;
+                const offsetY = height * 0.08;
+                const gridW = width * 0.94;
+                const gridH = height * 0.88;
+                nodes = [];
+
+                for (let y = 0; y < rows; y += 1) {
+                    for (let x = 0; x < cols; x += 1) {
+                        const px = offsetX + (gridW / (cols - 1)) * x;
+                        const py = offsetY + (gridH / (rows - 1)) * y;
+                        nodes.push({
+                            x: px,
+                            y: py,
+                            hx: px,
+                            hy: py,
+                            vx: 0,
+                            vy: 0,
+                            phase: Math.random() * Math.PI * 2,
+                            alpha: 0.14 + Math.random() * 0.14
+                        });
+                    }
+                }
+            }
+
+            function render(time) {
+                const t = time * 0.001;
+                pointer.x += (target.x - pointer.x) * 0.08;
+                pointer.y += (target.y - pointer.y) * 0.08;
+
+                const offsetX = ((pointer.x / width) - 0.5) * 26;
+                const offsetY = ((pointer.y / height) - 0.5) * 20;
+                root.style.setProperty('--tilt-x', `${offsetX}px`);
+                root.style.setProperty('--tilt-y', `${offsetY}px`);
+
+                ctx.clearRect(0, 0, width, height);
+                ctx.lineWidth = 1;
+
+                for (const node of nodes) {
+                    const homeX = node.hx + Math.sin(t + node.phase) * 6;
+                    const homeY = node.hy + Math.cos((t * 1.1) + node.phase) * 8;
+                    const dx = node.x - pointer.x;
+                    const dy = node.y - pointer.y;
+                    const dist = Math.hypot(dx, dy) || 0.001;
+                    const force = Math.max(0, 1 - dist / 170);
+
+                    node.vx += (homeX - node.x) * 0.02 + (dx / dist) * force * 0.8;
+                    node.vy += (homeY - node.y) * 0.02 + (dy / dist) * force * 0.8;
+                    node.vx *= 0.9;
+                    node.vy *= 0.9;
+                    node.x += node.vx;
+                    node.y += node.vy;
+                }
+
+                for (let i = 0; i < nodes.length; i += 1) {
+                    const a = nodes[i];
+                    for (let j = i + 1; j < nodes.length; j += 1) {
+                        const b = nodes[j];
+                        const dx = a.x - b.x;
+                        const dy = a.y - b.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist < 84) {
+                            ctx.strokeStyle = `rgba(132, 109, 232, ${0.08 * (1 - dist / 84)})`;
+                            ctx.beginPath();
+                            ctx.moveTo(a.x, a.y);
+                            ctx.lineTo(b.x, b.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                for (const node of nodes) {
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(132, 109, 232, ${node.alpha})`;
+                    ctx.arc(node.x, node.y, 1.6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                rafId = requestAnimationFrame(render);
+            }
+
+            window.addEventListener('pointermove', (event) => {
+                target.x = event.clientX;
+                target.y = event.clientY;
+            }, { passive: true });
+
+            window.addEventListener('pointerleave', () => {
+                target.x = window.innerWidth * 0.46;
+                target.y = window.innerHeight * 0.44;
+            }, { passive: true });
+
+            window.addEventListener('resize', resize);
+            resize();
+            rafId = requestAnimationFrame(render);
+            window.addEventListener('beforeunload', () => cancelAnimationFrame(rafId));
+        }
+    </script>
+</body>
+</html>

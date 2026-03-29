@@ -1,0 +1,13 @@
+flask
+flask-sqlalchemy
+psycopg2-binary
+flask-login
+flask-socketio
+werkzeug
+eventlet
+gunicorn
+cryptography
+# Optional for full SQLite file encryption (SQLCipher mode):
+# pysqlcipher3
+python-dotenv
+redis
